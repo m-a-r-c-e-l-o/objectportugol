@@ -1,0 +1,58 @@
+(* EBNF para Object Portugol *)
+(* Autor: Marcelo Camargo *)
+(* Agradecimentos: Paulo H. "Taka" Torrens *)
+
+
+algoritmo = "algoritmo", string, newline, [ declaracao-variaveis ], inicio, newline, "fimalgoritmo" ;
+string = ('"', identificador, '"') | ("'", identificador, "'") ;
+newline = { ? ASCII pra \n ou \r ? } ;
+declaracao-variaveis = "var", lista-variaveis ;
+inicio = "inicio", [ atribuicao-variaveis ] ;
+identificador = (letra | underline), [ { letra | digito | underline } ] ;
+letra = "A" | "B" | "C" | "D" | "E" | "F" | "G"
+	  | "H" | "I" | "J" | "K" | "L" | "M" | "N"
+	  | "O" | "P" | "Q" | "R" | "S" | "T" | "U"
+	  | "V" | "W" | "X" | "Y" | "Z" ;
+underline = "_" ;
+digito = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+lista-variaveis = identificador, ":", tipo, newline, [ lista-variaveis ] ;
+tipo = "inteiro", | "caracater", [ "[]" ] | "real" | "logico" | "vetor" ;
+atribuicao-variaveis = identificador, [ "[", identificador, "]" ], "<-", ( booleano | chamada-metodo | chamada-metodo-classe | identificador | string | nulo 
+					 | { operacao-matematica } ), newline, [ atribuicao-variaveis ] ;
+booleano = "VERDADEIRO" | "FALSO" ;
+nulo = "nil" ;
+operacao-matematica = { ( [ "(" ],  ( [ "-" ], digito ) | real | identificador | chamada-metodo, [ ")" ] ),  [ operador-matematico ],
+					( ( [ "(" ], [ "-" ], digito ) | real | identificador | chamada-metodo, [ ")" ] ) }, [ operacao-matematica ] ;
+real = digito, [ (".", { digito }) | ( { digito } ] ;
+whitespace = { ? ASCII para 32 ? } ;
+operador-matematico = "+" | "-" | "%" | "/" | "*" | "**" ;
+definicao-classe = "classe", identificador, ( [ [ "extende" | "implementa" ], identificador, [ "," ] ] ), newline,
+			     ( { [ definicao-procedimentos ] | [ definicao-metodos ] | [ definicoes-variaveis-classe ] } ), "fimclasse" ;
+definicao-procedimento = "procedimento", permissao, identificador, "(", [ parametros-recursivos ] ,")", newline, bloco-procedimento, "fimprocedimento" ;
+permissao = "publico", "privado", "protegido", "interno", [ { "selado" | "sobrescreve" | "abstrato" | "virtual" } ] ;				 
+parametros-recursivos = identificador, ":", tipo, [ "<-", ( booleano | chamada-metodo | real | identificador | string | nulo 
+					  | { operacao-matematica } ) ], [ parametros-recursivos ] ;
+bloco-procedimento = [ { chamada-metodo | chamada-procedimento | atribuicao-variaveis | instanciaco-classe | chamada-metodo-classe
+				   | bloco-condicional-se | bloco-enquanto | bloco-paracada | bloco-para | bloco-escolha | bloco-faca-enquanto
+				   | variavel-recebe-valor-metodo }, [ newline | bloco-procedimento ] ] ;
+chamada-metodo = identificador, "(", [ chamada-metodo | string | identificador | nulo | digito | real | booleano ] ,")" ;	
+chamada-procedimento = chamada-metodo ;			 
+bloco-metodo = bloco-procedimento, [ "retorna, ( chamada-metodo | string | identificador | nulo | digito | real | booleano ), [ newline ] ] ;
+instanciacao-classe = identificador, "<-", identificador, caracatere-padrao-geral, "novo", "(", [ parametros-recursivos ],")" ;
+chamada-metodo-classe = identificador, caracatere-padrao-geral, identificador, "(", [ parametros-recursivos ],")" ;
+chamada-metodo-procedimento = chamada-metodo-classe ;
+bloco-condicional-se = "se", expressao, "entao", newline, [ bloco-procedimento ], [ { ("senao se", expressao, newline, [ bloco-procedimento ] )} 
+					 | [ "senao", newline, [ bloco-procedimento ] ]  ], "fimse", newline ;
+expressao = ( ( ( identificador | digito | real | chamada-metodo | chamada-metodo-classe ), comparativo, ( identificador | digito | real 
+		  | chamada-metodo | chamada-metodo-classe | booleano ) | booleano ), [ ( "e" | "ou" ), expressao ] );
+bloco-enquanto = "enquanto", expressao, "faca", newline, [ bloco-procedimento ], "fimenquanto", newline ;
+bloco-paracada = "paracada", identificador, "como", identificador, newline, [ bloco-procedimento ], "fimparacada" ;
+comparativo = "<" | ">" | ">=", "<=", "==", "<>" ;
+bloco-para = "para", identificador, ( identificador | digito, chamada-metodo, chamada-metodo-classe ), ",", expressao, ",",
+		     ( identificador, asc-desc ), newline, [ bloco-procedimento ], "fimpara" ;
+asc-desc = ( "++" | "--" ) ( [ "+", "-" , ( digito, identificador, chamada-metodo, chamada-metodo-classe ) ] ) ;
+bloco-escolha = "escolha", identificador, newline, bloco-caso, [ { bloco-caso } | ( "caso padrao", newline ) ], "fimescolha" ;
+variavel-recebe-valor-metodo = identificador, "<-", whitespace, chamada-metodo-classe ;
+bloco-caso = "caso", identificador, newline, ( { [ bloco-metodo ] } ), newline, "pare" ;
+caractere-padrao-geral = "." ;
+bloco-faca-enquanto = "faca", newline, ( { [ bloco-procedimento | bloco-metodo ] } ), "enquanto", expressao, "fimenquanto" ;
